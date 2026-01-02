@@ -1,0 +1,16 @@
+services:
+  gateway:
+    build: .
+    ports:
+      - "8088:8088"
+    environment:
+      SERVER_PORT: 8088
+      EUREKA_URL: http://discovery:8761/eureka/
+    depends_on:
+      discovery:
+        condition: service_healthy
+    networks: [ebank-net]
+
+networks:
+  ebank-net:
+    external: true
