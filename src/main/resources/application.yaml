@@ -1,5 +1,6 @@
 server:
   port: ${SERVER_PORT:8088}
+  forward-headers-strategy: framework
 
 spring:
   application:
@@ -14,6 +15,24 @@ spring:
       - org.springframework.cloud.client.discovery.simple.reactive.SimpleReactiveDiscoveryClientAutoConfiguration
   cloud:
     gateway:
+      forwarded:
+        enabled: true
+      default-filters:
+        - DedupeResponseHeader=Access-Control-Allow-Origin Access-Control-Allow-Credentials
+      globalcors:
+        corsConfigurations:
+          '[/**]':
+            allowedOrigins:
+              - "http://localhost:4200"
+            allowedMethods:
+              - GET
+              - POST
+              - PUT
+              - DELETE
+              - OPTIONS
+            allowedHeaders:
+              - "*"
+            allowCredentials: true
       routes:
         - id: account
           uri: lb://account-service
@@ -42,6 +61,13 @@ spring:
             - Path=/api/auth/**
           filters:
             - StripPrefix=1
+
+        - id: auth-oauth2
+          uri: lb://auth-service
+          predicates:
+            - Path=/api/auth/oauth2/authorization/**
+          filters:
+            - StripPrefix=2
 
 eureka:
   client:
